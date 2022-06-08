@@ -429,13 +429,12 @@ echo '
 }
 ' > /usr/local/etc/v2ray/config.json
 
-# Mulai ulang v2ray dan nginx
-systemctl restart v2ray
-systemctl status v2ray
-
 #perbesar hash bucket size ke 64 
 sed -i 's/# server_names_hash_bucket_size 64;/server_names_hash_bucket_size 64;/g' /etc/nginx/nginx.conf
 
+# Mulai ulang v2ray dan nginx
+systemctl restart v2ray
+systemctl status v2ray
 /usr/sbin/nginx -t && systemctl restart nginx
 
 
