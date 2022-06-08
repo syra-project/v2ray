@@ -16,7 +16,7 @@ ln -sf /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
 if ! grep -q 'LC_TIME' /etc/default/locale;then echo 'LC_TIME=en_DK.UTF-8' >> /etc/default/locale;fi
 
 
-Perbarui sumber resmi Ubuntu, gunakan sumber resmi ubuntu untuk menginstal nginx dan paket dependen dan mengatur startup, tutup firewall ufw
+# Perbarui sumber resmi Ubuntu, gunakan sumber resmi ubuntu untuk menginstal nginx dan paket dependen dan mengatur startup, tutup firewall ufw
 apt clean all && apt update && apt upgrade -y
 apt install socat nginx curl pwgen openssl netcat cron -y
 systemctl enable nginx
