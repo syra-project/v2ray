@@ -1,92 +1,92 @@
 #!/bin/bash
-# Auth: happylife
+# Auth: syra
 # Desc: v2ray installation script
 # 	ws+vless,ws+trojan,ws+socks,ws+shadowsocks
 #	grpc+vless,grpc+trojan,grpc+socks,grpc+shadowsocks
 # Plat: ubuntu 18.04+
-# Eg  : bash v2ray_installation_ws+grpc_vless+trojan+socks+shadowsocks.sh "你的域名"
+# Eg  : bash v2ray_installation_ws+grpc_vless+trojan+socks+shadowsocks.sh "nama domain Anda"
 
-if [ -z "$1" ];then
-	echo "域名不能为空"
+if [ -z "id-01.syra.co.id" ];then
+	echo "Nama domain tidak boleh kosong"
 	exit
 fi
 
-# 配置系统时区为东八区,并设置时间为24H制
-ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+# Konfigurasikan zona waktu sistem sebagai Distrik Kedelapan Timur, dan atur waktu ke 24H
+ln -sf /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
 if ! grep -q 'LC_TIME' /etc/default/locale;then echo 'LC_TIME=en_DK.UTF-8' >> /etc/default/locale;fi
 
 
-# 更新Ubuntu官方源，使用ubuntu官方源安装nginx和依赖包并设置开机启动，关闭防火墙ufw
+Perbarui sumber resmi Ubuntu, gunakan sumber resmi ubuntu untuk menginstal nginx dan paket dependen dan mengatur startup, tutup firewall ufw
 apt clean all && apt update
-apt install nginx curl pwgen openssl netcat cron -y
+apt install socat nginx curl pwgen openssl netcat cron -y
 systemctl enable nginx
 ufw disable
 
 
-# 开始部署之前，我们先配置一下需要用到的参数，如下：
-# "域名，uuid，ws和grpc路径，domainSock目录，ssl证书目录"
+# Sebelum memulai penerapan, mari kita konfigurasikan parameter yang perlu digunakan, sebagai berikut: 27 
+# "nama domain, uuid, jalur ws dan grpc, direktori domainSock, direktori sertifikat ssl"
 
-# 1.设置你的解析好的域名
-domainName="$1"
+# 1. Tetapkan nama domain Anda yang telah diselesaikan
+domainName="id-01.syra.co.id"
 
-# 2.随机生成一个uuid
+# 2. Secara acak menghasilkan uuid
 uuid="`uuidgen`"
 
-# 3.分别随机生成socks和shadowsocks需要用到的服务端口
+# 3. Buat port layanan secara acak yang perlu digunakan oleh socks dan shadowsocks
 socks_ws_port="`shuf -i 20000-30000 -n 1`"
 shadowsocks_ws_port="`shuf -i 30001-40000 -n 1`"
 socks_grpc_port="`shuf -i 40001-50000 -n 1`"
 shadowsocks_grpc_port="`shuf -i 50001-60000 -n 1`"
 
-# 4.分别随机生成trojan,socks和shadowsocks用户密码
-trojan_passwd="$(pwgen -1cnys -r "'\";:$\\" 16)"
-socks_user="$(pwgen -1cns 9)"
-socks_passwd="$(pwgen -1cnys -r "'\";:$\\" 16)"
-shadowsocks_passwd="$(pwgen -1cnys -r "'\";:$\\" 16)"
+# 4. Buat kata sandi pengguna trojan, socks, dan shadowsocks secara acak
+trojan_passwd="syra"
+socks_user="syra"
+socks_passwd="syra"
+shadowsocks_passwd="syra"
 
-# 5.使用WS配置vless,trojan,socks,shadowsocks协议
-# 分别随机生成vless,trojan,socks,shadowsocks需要使用的ws的path
-vless_ws_path="/`pwgen -csn 6 8 | xargs |sed 's/ /\//g'`"
-trojan_ws_path="/`pwgen -csn 6 8 | xargs |sed 's/ /\//g'`"
-socks_ws_path="/`pwgen -csn 6 8 | xargs |sed 's/ /\//g'`"
-shadowsocks_ws_path="/`pwgen -csn 6 8 | xargs |sed 's/ /\//g'`"
+# 5. Gunakan WS untuk mengonfigurasi protokol vless, trojan, socks, shadowsocks 48 
+# Secara acak menghasilkan jalur ws yang perlu digunakan vless, trojan, socks, shadowsocks
+vless_ws_path="/syra/vless_ws"
+trojan_ws_path="/syra/trojan_ws"
+socks_ws_path="/syra/socks_ws"
+shadowsocks_ws_path="/syra/ss_ws"
 
-# 6.使用gRPC配置vless,trojan,socks,shadowsocks协议
-# 分别随机生成vless,trojan,socks,shadowsocks需要使用的grpc的path
-vless_grpc_path="$(pwgen -1scn 12)$(pwgen -1scny -r "\!@#$%^&*()-+={}[]|:\";',/?><\`~" 36)"
-trojan_grpc_path="$(pwgen -1scn 12)$(pwgen -1scny -r "\!@#$%^&*()-+={}[]|:\";',/?><\`~" 36)"
-socks_grpc_path="$(pwgen -1scn 12)$(pwgen -1scny -r "\!@#$%^&*()-+={}[]|:\";',/?><\`~" 36)"
-shadowsocks_grpc_path="$(pwgen -1scn 12)$(pwgen -1scny -r "\!@#$%^&*()-+={}[]|:\";',/?><\`~" 36)"
+# 6. Gunakan gRPC untuk mengonfigurasi protokol vless, trojan, socks, shadowsocks 55 
+# Secara acak menghasilkan jalur grpc yang perlu digunakan vless, trojan, socks, shadowsocks
+vless_grpc_path="/syra/vless_grpc"
+trojan_grpc_path="/syra/trojan_grpc"
+socks_grpc_path="/syra/socks_grpc"
+shadowsocks_grpc_path="/syra/ss_grpc"
 
-# 7.创建需要用的domainSock目录,并授权nginx用户权限
+# 7. Buat direktori domainSock yang diperlukan dan otorisasi izin pengguna nginx
 domainSock_dir="/run/v2ray";! [ -d $domainSock_dir ] && mkdir -pv $domainSock_dir
 chown www-data.www-data $domainSock_dir
 
-# 8.定义需要用到的domainSock文件名
+#8. Tentukan nama file domainSock yang perlu digunakan
 vless_ws_domainSock="${domainSock_dir}/vless_ws.sock"
 trojan_ws_domainSock="${domainSock_dir}/trojan_ws.sock"
 vless_grpc_domainSock="${domainSock_dir}/vless_grpc.sock"
 trojan_grpc_domainSock="${domainSock_dir}/trojan_grpc.sock"
 
-# 9.以时间为基准随机创建一个存放ssl证书的目录
+# 9. Buat direktori secara acak untuk menyimpan sertifikat ssl berdasarkan waktu
 ssl_dir="$(mkdir -pv "/etc/nginx/ssl/`date +"%F-%H-%M-%S"`" |awk -F"'" END'{print $2}')"
 
-# 使用v2ray官方命令安装v2ray并修改用户为www-data和重新加载服务文件
-# 1.官方命令安装v2ray
+# Instal v2ray menggunakan perintah v2ray resmi dan ubah pengguna menjadi www-data dan muat ulang file layanan 75 
+# 1. Perintah resmi untuk menginstal v2ray
 curl -O https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh
 curl -O https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-dat-release.sh
 bash install-release.sh
 bash install-dat-release.sh
-# 2.修改v2ray日志目录权限为www-data
+# 2. Ubah izin direktori log v2ray ke www-data
 chown -R www-data.www-data /var/log/v2ray
-# 3.修改v2ray默认用户为www-data
+# 3. Ubah pengguna default v2ray ke www-data
 sed -i '/User=nobody/cUser=www-data' /etc/systemd/system/v2ray.service
 sed -i '/User=nobody/cUser=www-data' /etc/systemd/system/v2ray@.service
-# 4.重新加载v2ray服务文件
+# 4. Muat ulang file layanan v2ray
 systemctl daemon-reload
 
 
-##安装acme,并申请加密证书
+##Instal acme dan ajukan sertifikat enkripsi
 source ~/.bashrc
 if nc -z localhost 443;then /etc/init.d/nginx stop;fi
 if ! [ -d /root/.acme.sh ];then curl https://get.acme.sh | sh;fi
@@ -95,7 +95,7 @@ if ! [ -d /root/.acme.sh ];then curl https://get.acme.sh | sh;fi
 ~/.acme.sh/acme.sh --installcert -d "$domainName" --fullchainpath $ssl_dir/v2ray.crt --keypath $ssl_dir/v2ray.key --ecc
 chown www-data.www-data $ssl_dir/v2ray.*
 
-## 把续签证书命令添加到计划任务
+## Tambahkan perintah perbarui sertifikat ke tugas yang dijadwalkan
 echo -n '#!/bin/bash
 /etc/init.d/nginx stop
 "/root/.acme.sh"/acme.sh --cron --home "/root/.acme.sh" &> /root/renew_ssl.log
@@ -105,7 +105,7 @@ chmod +x /usr/local/bin/ssl_renew.sh
 if ! grep -q 'ssl_renew.sh' /var/spool/cron/crontabs/root;then (crontab -l;echo "15 03 */3 * * /usr/local/bin/ssl_renew.sh") | crontab;fi
 
 
-# 配置nginx【如下80服务块完全可以不需要】，执行如下命令即可添加nginx配置文件
+# Konfigurasi nginx [80 blok layanan berikut sama sekali tidak diperlukan], jalankan perintah berikut untuk menambahkan file konfigurasi nginx
 echo "
 server {
 	listen 80;
@@ -122,7 +122,7 @@ server {
 	ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
 	root /usr/share/nginx/html;
 
-	# ------------------- WS配置部分开始 -------------------
+	# ------------------- Bagian konfigurasi WS dimulai -------------------
 	location = "$vless_ws_path" {
 		proxy_redirect off;
 		proxy_pass http://unix:"${vless_ws_domainSock}";
@@ -166,9 +166,9 @@ server {
 	        proxy_set_header X-Real-IP "'"$remote_addr"'";
 	        proxy_set_header X-Forwarded-For "'"$proxy_add_x_forwarded_for"'";	
 	}	
-	# ------------------- WS配置部分结束 -------------------
+	# ------------------- Akhir dari bagian konfigurasi WS -------------------
 
-	# ------------------ gRPC配置部分开始 ------------------
+	# ------------------ Bagian konfigurasi gRPC dimula ------------------
 	location ^~ "/$vless_grpc_path" {
 		proxy_redirect off;
 	  	grpc_set_header Host "'"$host"'";
@@ -200,12 +200,12 @@ server {
 	  	grpc_set_header X-Forwarded-For "'"$proxy_add_x_forwarded_for"'";
 		grpc_pass grpc://127.0.0.1:"$shadowsocks_grpc_port";		
 	}	
-	# ------------------ gRPC配置部分结束 ------------------	
+	# ------------------ akhir bagian konfigurasi gRPC ------------------	
 
 }
 " > /etc/nginx/conf.d/v2ray.conf
 
-# 配置v2ray，执行如下命令即可添加v2ray配置文件
+# Konfigurasi v2ray, jalankan perintah berikut untuk menambahkan file konfigurasi v2ray
 echo '
 {
   "log" : {
@@ -429,59 +429,63 @@ echo '
 }
 ' > /usr/local/etc/v2ray/config.json
 
-# 重启v2ray和nginx
+# Mulai ulang v2ray dan nginx
 systemctl restart v2ray
 systemctl status v2ray
+
+#perbesar hash bucket size ke 64 
+sed -i 's/# server_names_hash_bucket_size 64;/server_names_hash_bucket_size 64;/g' /etc/nginx/nginx.conf
+
 /usr/sbin/nginx -t && systemctl restart nginx
 
 
-# 输出配置信息并保存到文件
+# Keluarkan informasi konfigurasi dan simpan ke file
 v2ray_config_info="/root/v2ray_config.info"
 echo "
------------ 所有连接方式统一域名和端口 -----------
-域名	: $domainName
-端口	: 443
+----------- Nama domain dan port terpadu untuk semua metode koneksi -----------
+nama domain	: $domainName
+Port		: 443
 
-------------- WS传输 ------------
+------------- WS ------------
 -----------1. vless+ws -----------
-协议	: vless
-UUID	 : $uuid
-路径	: $vless_ws_path
+Protokol	: vless
+UUID		: $uuid
+Path		: $vless_ws_path
 
 -----------2. trojan+ws -----------
-协议	: trojan
-密码	: $trojan_passwd
-路径	: $trojan_ws_path
+Protokol	: trojan
+Katasandi	: $trojan_passwd
+Path		: $trojan_ws_path
 
 -----------3. socks+ws ------------
-协议	: socks
-用户	：$socks_user	
-密码	: $socks_passwd
-路径	: $socks_ws_path
+Protokol	: socks
+Pengguna	：$socks_user	
+Sandi	: $socks_passwd
+Path	: $socks_ws_path
 
 -------- 4. shadowsocks+ws ---------
-协议	: shadowsocks
-密码	: $shadowsocks_passwd
-加密	：AES-128-GCM
-路径	: $shadowsocks_ws_path
+Protokol	: shadowsocks
+Sandi		: $shadowsocks_passwd
+Enkripsi	：AES-128-GCM
+Path	: $shadowsocks_ws_path
 
------------- gRPC传输 -----------
+------------ gRPC -----------
 ------------5. vless+grpc -----------
-协议	: vless
-UUID	: $uuid
-路径	: $vless_grpc_path
+Protokol	: vless
+UUID		: $uuid
+Path		: $vless_grpc_path
 -----------6. trojan+grpc -----------
-协议	: trojan
-密码	: $trojan_passwd
-路径	: $trojan_grpc_path
+Protokol	: trojan
+Sandi		: $trojan_passwd
+Path		: $trojan_grpc_path
 -----------7. socks+grpc ------------
-协议	: socks
-用户	：$socks_user
-密码	: $socks_passwd
-路径	: $socks_grpc_path
+Protokol	: socks
+Pengguna	：$socks_user
+Sandi		: $socks_passwd
+Path		: $socks_grpc_path
 --------8. shadowsocks+grpc ---------
-协议	: shadowsocks
-密码	: $shadowsocks_passwd
-加密	：AES-128-GCM
-路径	: $shadowsocks_grpc_path
+Protokol	: shadowsocks
+Sandi		: $shadowsocks_passwd
+Enkripsi	：AES-128-GCM
+Path	: $shadowsocks_grpc_path
 " | tee $v2ray_config_info
