@@ -6,7 +6,7 @@
 # Plat: ubuntu 18.04+
 # Eg  : bash v2ray_installation_ws+grpc_vless+trojan+socks+shadowsocks.sh "nama domain Anda"
 
-if [ -z "id-01.syra.co.id" ];then
+if [ -z "id.syra.co.id" ];then
 	echo "Nama domain tidak boleh kosong"
 	exit
 fi
@@ -27,7 +27,7 @@ ufw disable
 # "nama domain, uuid, jalur ws dan grpc, direktori domainSock, direktori sertifikat ssl"
 
 # 1. Tetapkan nama domain Anda yang telah diselesaikan
-domainName="id-01.syra.co.id"
+domainName="id.syra.co.id"
 
 # 2. Secara acak menghasilkan uuid
 uuid="`uuidgen`"
@@ -46,17 +46,17 @@ shadowsocks_passwd="syra"
 
 # 5. Gunakan WS untuk mengonfigurasi protokol vless, trojan, socks, shadowsocks 48 
 # Secara acak menghasilkan jalur ws yang perlu digunakan vless, trojan, socks, shadowsocks
-vless_ws_path="/syra/vless_ws"
-trojan_ws_path="/syra/trojan_ws"
-socks_ws_path="/syra/socks_ws"
-shadowsocks_ws_path="/syra/ss_ws"
+vless_ws_path="/syra/`pwgen -csn 6 1 | xargs |sed 's/ /\//g'`"
+trojan_ws_path="/syra/`pwgen -csn 6 1 | xargs |sed 's/ /\//g'`"
+socks_ws_path="/syra/`pwgen -csn 6 1 | xargs |sed 's/ /\//g'`"
+shadowsocks_ws_path="/syra/`pwgen -csn 6 1 | xargs |sed 's/ /\//g'`"
 
 # 6. Gunakan gRPC untuk mengonfigurasi protokol vless, trojan, socks, shadowsocks 55 
 # Secara acak menghasilkan jalur grpc yang perlu digunakan vless, trojan, socks, shadowsocks
-vless_grpc_path="/syra/vless_grpc"
-trojan_grpc_path="/syra/trojan_grpc"
-socks_grpc_path="/syra/socks_grpc"
-shadowsocks_grpc_path="/syra/ss_grpc"
+vless_grpc_path="$(pwgen -1scn 12)$(pwgen -1scny -r "\!@#$%^&*()-+={}[]|:\";',/?><\`~" 36)"
+trojan_grpc_path="$(pwgen -1scn 12)$(pwgen -1scny -r "\!@#$%^&*()-+={}[]|:\";',/?><\`~" 36)"
+socks_grpc_path="$(pwgen -1scn 12)$(pwgen -1scny -r "\!@#$%^&*()-+={}[]|:\";',/?><\`~" 36)"
+shadowsocks_grpc_path="$(pwgen -1scn 12)$(pwgen -1scny -r "\!@#$%^&*()-+={}[]|:\";',/?><\`~" 36)"
 
 # 7. Buat direktori domainSock yang diperlukan dan otorisasi izin pengguna nginx
 domainSock_dir="/run/v2ray";! [ -d $domainSock_dir ] && mkdir -pv $domainSock_dir
