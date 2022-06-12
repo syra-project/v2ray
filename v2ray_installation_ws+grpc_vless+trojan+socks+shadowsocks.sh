@@ -379,53 +379,28 @@ echo '
 		}
 	}	
   ],
-  "outbound": {
-    "protocol": "freedom",
-    "settings": {
-      "decryption":"none"
-    }
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "protocol": [
+          "bittorrent"
+        ],
+        "outboundTag": "blocked"
+      }
+    ]
   },
-  "outboundDetour": [
+  "outbounds": [
     {
+      "protocol": "freedom",
+      "settings": {}
+    },
+    {
+      "tag": "blocked",
       "protocol": "blackhole",
-      "settings": {
-        "decryption":"none"
-      },
-      "tag": "blocked"
+      "settings": {}
     }
-  ],
-  "routing": {
-      "domainStrategy": "IPIfNonMatch",
-      "rules": [
-        {
-          "domain": [
-              "geosite:cn"
-          ],
-          "outboundTag": "blocked",
-          "type": "field"
-        },      
-        {
-            "ip": [
-                "geoip:cn"
-            ],
-            "outboundTag": "blocked",
-            "type": "field"
-        }
-      ]
-  },  
-  "routing": {
-    "strategy": "rules",
-    "settings": {
-      "decryption":"none",
-      "rules": [
-        {
-          "type": "field",
-          "ip": [ "geoip:private" ],
-          "outboundTag": "blocked"
-        }
-      ]
-    }
-  }
+  ]
 }
 ' > /usr/local/etc/v2ray/config.json
 
